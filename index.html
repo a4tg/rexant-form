@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>REXANT · Опрос</title>
+<meta name="color-scheme" content="dark light">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Russo+One&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f0e0c;
+    --panel:#1b1916;
+    --accent:#c99a40;      /* латунь/бронза */
+    --accent2:#8b6b2a;     /* потемневшая бронза */
+    --edge:#2a2824;
+    --text:#f2e9d0;
+    --muted:#c8b890;
+    --rexant:#e31b23;      /* фирменный красный REXANT */
+    --ok:#5fd38d;
+    --bad:#f1544f;
+    --shadow: 0 10px 30px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.04);
+  }
+  html,body{height:100%}
+  body{
+    margin:0; background:
+      radial-gradient(1200px 800px at 20% -10%, rgba(201,154,64,.16), transparent 60%),
+      radial-gradient(1000px 600px at 120% 120%, rgba(139,107,42,.12), transparent 50%),
+      linear-gradient(180deg, #13110f, #0b0a08 60%);
+    color:var(--text); font-family: "Cinzel", ui-serif, serif;
+    display:flex; align-items:center; justify-content:center; padding:24px;
+  }
+  .frame{
+    width:min(960px, 100%);
+    background: linear-gradient(180deg, #171512, #13110f);
+    border: 1px solid var(--edge);
+    border-radius: 18px;
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+  }
+  /* декоративная рамка с заклепками */
+  .bezel{
+    position:absolute; inset:0; pointer-events:none;
+    border: 12px solid transparent;
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+  }
+  .bezel::before{
+    content:"";
+    position:absolute; inset:10px;
+    border:2px solid rgba(201,154,64,.35);
+    box-shadow: inset 0 0 18px rgba(201,154,64,.16);
+    border-radius:12px;
+  }
+  .rivets{
+    position:absolute; inset:0; pointer-events:none;
+    background:
+      radial-gradient(circle at 30px 30px, var(--accent) 0 5px, #0000 6px) top left/60px 60px repeat,
+      radial-gradient(circle at calc(100% - 30px) 30px, var(--accent) 0 5px, #0000 6px) top right/60px 60px repeat,
+      radial-gradient(circle at 30px calc(100% - 30px), var(--accent) 0 5px, #0000 6px) bottom left/60px 60px repeat,
+      radial-gradient(circle at calc(100% - 30px) calc(100% - 30px), var(--accent) 0 5px, #0000 6px) bottom right/60px 60px repeat;
+    opacity:.12;
+  }
+
+  header{
+    display:flex; align-items:center; gap:16px;
+    padding:28px 28px 8px;
+    border-bottom:1px solid #26231f;
+    background:
+      linear-gradient(180deg, rgba(201,154,64,.10), rgba(201,154,64,0) 40%),
+      linear-gradient(180deg, #181612, #151311);
+  }
+  .brand{
+    font-family:"Russo One", system-ui, sans-serif;
+    letter-spacing:.5px;
+    display:flex; align-items:baseline; gap:12px; flex-wrap:wrap;
+  }
+  .brand .rx{color:var(--rexant); font-size:28px}
+  .brand .title{font-size:22px; color:var(--text)}
+  .subtitle{color:var(--muted); font-size:14px; margin-top:2px}
+
+  /* декоративные шестерёнки */
+  .gears{
+    position:absolute; right:-40px; top:-40px; width:220px; height:220px; opacity:.15; filter:drop-shadow(0 4px 16px rgba(0,0,0,.5));
+  }
+  .gear{ position:absolute; border-radius:50%; border:8px solid var(--accent2); box-shadow: inset 0 0 24px rgba(0,0,0,.6), inset 0 0 4px rgba(255,255,255,.08)}
+  .g1{ width:220px; height:220px; animation: spin 38s linear infinite; }
+  .g2{ width:140px; height:140px; left:30px; top:90px; border-color:var(--accent); animation: spinReverse 22s linear infinite; }
+  .g3{ width:90px; height:90px; left:120px; top:120px; animation: spin 16s linear infinite; }
+  @keyframes spin{ to{ transform: rotate(360deg)} }
+  @keyframes spinReverse{ to{ transform: rotate(-360deg)} }
+
+  .content{ padding:24px 28px 28px; display:grid; grid-template-columns: 1fr; gap:18px}
+  .panel{
+    background: linear-gradient(180deg, #191714, #151310);
+    border:1px solid #2a251e; border-radius:14px; padding:18px;
+    box-shadow: var(--shadow);
+  }
+  .panel h2{ margin:0 0 12px; font-size:20px; letter-spacing:.5px}
+  label{ display:block; font-size:14px; color:var(--muted); margin:10px 0 6px}
+  input, select, textarea{
+    width:100%; background:#0f0d0b; color:var(--text);
+    border:1px solid #3a332a; border-radius:10px; padding:12px 12px;
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    transition: border-color .25s, box-shadow .25s, transform .05s;
+  }
+  input:focus, select:focus, textarea:focus{
+    outline:none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(201,154,64,.18);
+  }
+  .row{display:grid; grid-template-columns: 1fr 1fr; gap:12px}
+  .chips{ display:flex; flex-wrap:wrap; gap:8px}
+  .chip input{ display:none}
+  .chip label{
+    cursor:pointer; user-select:none; margin:0;
+    background:#12100e; border:1px solid #3a332a; color:var(--text);
+    padding:10px 12px; border-radius:100px; font-size:13px;
+  }
+  .chip input:checked + label{
+    border-color: var(--accent); box-shadow: inset 0 0 0 1px rgba(201,154,64,.4); background: linear-gradient(180deg,#1d1a16,#16130f);
+  }
+  .range-wrap{ position:relative; padding-top:10px}
+  .range-wrap output{
+    position:absolute; top:-2px; right:0; font-size:12px; color:var(--muted)
+  }
+  input[type="range"]{ width:100% }
+  .consent{ display:flex; align-items:start; gap:10px; font-size:13px; color:var(--muted)}
+  .consent input{ width:auto; margin-top:3px}
+  .footer{
+    display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:10px
+  }
+  .btn{
+    appearance:none; border:none; cursor:pointer;
+    background: linear-gradient(180deg, var(--rexant), #b7151b);
+    color:#fff; padding:12px 18px; border-radius:12px; font-weight:700; letter-spacing:.4px;
+    box-shadow: 0 8px 22px rgba(227,27,35,.28), inset 0 0 0 1px rgba(255,255,255,.2);
+    transition: transform .05s ease, filter .2s ease;
+    font-family: "Russo One", system-ui, sans-serif;
+  }
+  .btn:active{ transform: translateY(1px) }
+  .btn.outline{
+    background: linear-gradient(180deg, #1c1916, #14120f);
+    color:var(--text); border:1px solid var(--accent2); box-shadow: var(--shadow);
+  }
+  .status{ font-size:13px; color:var(--muted)}
+  .status.ok{ color:var(--ok)}
+  .status.err{ color:var(--bad)}
+  .hint{ font-size:12px; color:#a8976f}
+
+  /* адаптив */
+  @media (max-width:720px){
+    .row{ grid-template-columns: 1fr; }
+    header{ padding:20px 20px 8px }
+    .content{ padding:20px }
+  }
+</style>
+</head>
+<body>
+  <div class="frame" id="app">
+    <div class="bezel"></div>
+    <div class="rivets"></div>
+    <div class="gears" aria-hidden="true">
+      <div class="gear g1"></div>
+      <div class="gear g2"></div>
+      <div class="gear g3"></div>
+    </div>
+
+    <header>
+      <div class="brand">
+        <span class="rx">REXANT</span>
+        <span class="title">Полевой опрос</span>
+        <div class="subtitle">Сканируйте QR и ответьте за 60 секунд</div>
+      </div>
+    </header>
+
+    <div class="content">
+      <form class="panel" id="form">
+        <h2>Контакты</h2>
+        <div class="row">
+          <div>
+            <label>Имя и компания</label>
+            <input name="name" placeholder="Иван, ООО «ЭлектроМонтаж»" required />
+          </div>
+          <div>
+            <label>Телефон или email</label>
+            <input name="contact" type="text" inputmode="email" placeholder="+7 999 000-00-00 / name@company.ru" required />
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Регион</label>
+            <select name="region" required>
+              <option value="" disabled selected>Выберите регион</option>
+              <option>Москва и МО</option>
+              <option>Санкт-Петербург и ЛО</option>
+              <option>ЦФО</option>
+              <option>ЮФО</option>
+              <option>ПФО</option>
+              <option>УФО</option>
+              <option>СФО</option>
+              <option>ДФО</option>
+              <option>Другое</option>
+            </select>
+          </div>
+          <div>
+            <label>Роль</label>
+            <select name="role" required>
+              <option value="" disabled selected>Кто вы</option>
+              <option>Монтажник/бригада</option>
+              <option>Инженер-сметчик</option>
+              <option>Закупки</option>
+              <option>Проектировщик</option>
+              <option>Розница/дистрибьютор</option>
+              <option>Другое</option>
+            </select>
+          </div>
+        </div>
+
+        <h2 style="margin-top:18px">Интерес и опыт</h2>
+
+        <label>Что интересует сейчас</label>
+        <div class="chips">
+          <div class="chip"><input id="c1" type="checkbox" name="interest" value="Кабель и провод" /><label for="c1">Кабель и провод</label></div>
+          <div class="chip"><input id="c2" type="checkbox" name="interest" value="Розетки/выключатели" /><label for="c2">Розетки/выключатели</label></div>
+          <div class="chip"><input id="c3" type="checkbox" name="interest" value="Свет/LED" /><label for="c3">Свет/LED</label></div>
+          <div class="chip"><input id="c4" type="checkbox" name="interest" value="Инструмент" /><label for="c4">Инструмент</label></div>
+          <div class="chip"><input id="c5" type="checkbox" name="interest" value="TV/SAT/Слаботочка" /><label for="c5">TV/SAT/Слаботочка</label></div>
+          <div class="chip"><input id="c6" type="checkbox" name="interest" value="Термоусадка/гофра/клеммы" /><label for="c6">Термоусадка/гофра/клеммы</label></div>
+        </div>
+
+        <div class="row">
+          <div class="range-wrap">
+            <label>Оцените знакомство с REXANT</label>
+            <input type="range" name="familiarity" min="0" max="10" value="5" oninput="this.nextElementSibling.value=this.value"/>
+            <output>5</output>
+            <div class="hint">0 — впервые слышу · 10 — покупаю регулярно</div>
+          </div>
+          <div class="range-wrap">
+            <label>Готовность к тесту/закупке</label>
+            <input type="range" name="willingness" min="0" max="10" value="7" oninput="this.nextElementSibling.value=this.value"/>
+            <output>7</output>
+            <div class="hint">0 — неинтересно · 10 — хочу счёт сегодня</div>
+          </div>
+        </div>
+
+        <label>Комментарий / запрос</label>
+        <textarea name="comment" rows="4" placeholder="Какие позиции и объёмы планируете, сроки, пожелания по связи…"></textarea>
+
+        <!-- антибот-мёд -->
+        <input type="text" name="company_site" autocomplete="off" tabindex="-1" style="position:absolute; left:-9999px; opacity:0">
+
+        <div class="consent">
+          <input id="consent" type="checkbox" required>
+          <label for="consent">Согласен на обработку данных и обратную связь от REXANT</label>
+        </div>
+
+        <div class="footer">
+          <button class="btn" type="submit">Отправить</button>
+          <button class="btn outline" type="button" id="reset">Сбросить</button>
+          <div class="status" id="status" role="status" aria-live="polite"></div>
+        </div>
+      </form>
+
+      <div class="panel" id="qrPanel" hidden>
+        <h2>QR для печати</h2>
+        <p class="hint">Скачайте и поставьте на стойку/стенд. При необходимости сгенерируйте другой размер.</p>
+        <img id="qr" alt="QR code" style="width:220px; height:220px; border-radius:10px; border:1px solid #332b21; background:#0e0c0a; padding:8px">
+      </div>
+    </div>
+  </div>
+
+<script>
+/* === НАСТРОЙКИ ===
+   1) После публикации Google Apps Script вставьте URL ниже.
+   2) Чтобы показать блок с QR прямо на странице (для печати), поставьте SHOW_QR = true.
+*/
+const SHEET_ENDPOINT = "https://script.google.com/macros/s/AKfycbyl6gp0eyDSs9NAMFyH_2M82E4u4zVMH8AvuJigXgNsCqTXBMXVr-yjwXDkk6QkHfZa/exec";
+const SHOW_QR = false;
+
+/* ==== ЛОГИКА ===== */
+const form = document.getElementById('form');
+const statusEl = document.getElementById('status');
+const resetBtn = document.getElementById('reset');
+
+function formDataToObject(fd){
+  const obj = {};
+  for (const [k,v] of fd.entries()){
+    if (obj[k]) {
+      if (!Array.isArray(obj[k])) obj[k] = [obj[k]];
+      obj[k].push(v);
+    } else {
+      obj[k] = v;
+    }
+  }
+  return obj;
+}
+
+// localStorage защита от повтора за сессию
+const SUBMIT_KEY = 'rexant_survey_submitted';
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  statusEl.textContent = "Отправляем…";
+  statusEl.className = "status";
+
+  if (localStorage.getItem(SUBMIT_KEY)) {
+    statusEl.textContent = "Ответ уже отправлен с этого устройства. Спасибо!";
+    statusEl.classList.add('ok');
+    return;
+  }
+
+  const fd = new FormData(form);
+  const honey = fd.get('company_site');
+  if (honey) {
+    statusEl.textContent = "Ошибка отправки. Попробуйте ещё раз.";
+    statusEl.classList.add('err');
+    return;
+  }
+
+  const payload = formDataToObject(fd);
+  payload.timestamp = new Date().toISOString();
+  payload.userAgent = navigator.userAgent;
+
+  try{
+    const res = await fetch(SHEET_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      mode: 'cors'
+    });
+    if (!res.ok) throw new Error('Bad status ' + res.status);
+    const data = await res.json().catch(()=> ({}));
+
+    statusEl.textContent = "Готово! Спасибо за ответы.";
+    statusEl.classList.add('ok');
+    localStorage.setItem(SUBMIT_KEY, '1');
+
+    // мягкая очистка полей, кроме контакта, чтобы можно было показать менеджеру
+    setTimeout(()=> {
+      form.reset();
+    }, 1200);
+  }catch(err){
+    console.error(err);
+    statusEl.textContent = "Сбой сети. Проверьте интернет и попробуйте снова.";
+    statusEl.classList.add('err');
+  }
+});
+
+resetBtn.addEventListener('click', () => {
+  localStorage.removeItem(SUBMIT_KEY);
+  form.reset();
+  statusEl.textContent = "Форма очищена.";
+  statusEl.className = "status";
+});
+
+// QR блок — отрисуем, если включено
+(function initQR(){
+  if (!SHOW_QR) return;
+  const p = document.getElementById('qrPanel');
+  const img = document.getElementById('qr');
+  const url = location.href;
+  const encoded = encodeURIComponent(url);
+  // простой генератор через Google Chart API
+  img.src = `https://chart.googleapis.com/chart?cht=qr&chs=512x512&chl=${encoded}`;
+  p.hidden = false;
+})();
+</script>
+</body>
+</html>
